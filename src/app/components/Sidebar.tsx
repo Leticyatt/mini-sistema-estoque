@@ -75,7 +75,7 @@ export function Sidebar({ current, onNavigate, onLogout }: SidebarProps) {
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3 shadow" style={{ backgroundColor: "#2E8B57" }}>
         <div className="flex items-center gap-2">
           <Package size={20} className="text-white" />
-          <span className="text-white font-semibold text-sm">StockAdmin</span>
+          <span className="text-white font-semibold text-sm">Controle de Estoque</span>
         </div>
         <button onClick={() => setOpen(!open)} className="text-white p-1">
           {open ? <X size={22} /> : <Menu size={22} />}
