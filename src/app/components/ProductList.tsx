@@ -70,11 +70,6 @@ export function ProductList({ products, onNew, onEdit, onDelete }: ProductListPr
           <option value="Zerado">Zerado</option>
         </select>
 
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 bg-white hover:bg-gray-50 transition-colors">
-          <Download size={15} />
-          Exportar
-        </button>
-
         <button
           onClick={onNew}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium transition-all hover:opacity-90"

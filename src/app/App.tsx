@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"; // Importações necessárias
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { MovementHistory } from "./components/MovementHistory";
 import { supabase } from "./supabase";
 
 import Login from "./components/Login";
@@ -15,19 +16,29 @@ import { StockAlerts } from "./components/StockAlerts";
 import { StockMovement } from "./components/StockMovement";
 import { Product } from "./components/data"; 
 
-type Screen = "dashboard" | "products" | "product-form" | "alerts" | "movement";
+type Screen = "dashboard" | "products" | "product-form" | "alerts" | "movement" | "history";
 
 export default function App() {
   const [session, setSession] = useState<any>(null); 
-  const [screen, setScreen] = useState<Screen>("dashboard");
+  const [loading, setLoading] = useState(true); 
+  
+  
+  const [screen, setScreen] = useState<Screen>(() => {
+    return (localStorage.getItem("@stockadmin-screen") as Screen) || "dashboard";
+  });
   
   const [products, setProducts] = useState<Product[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [restockProduct, setRestockProduct] = useState<Product | null>(null);
 
   useEffect(() => {
+    localStorage.setItem("@stockadmin-screen", screen);
+  }, [screen]);
+
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setLoading(false); 
     });
 
     const {
@@ -115,16 +126,33 @@ export default function App() {
     const produtoAtual = products.find(p => p.id === productId);
     if (!produtoAtual) return;
 
+    // Calcula a nova quantidade
     const novaQuantidade = Math.max(0, (produtoAtual as any).quantity + (type === "Entrada" ? qty : -qty));
 
-    const { error } = await supabase.from('produtos').update({ quantity: novaQuantidade }).eq('id', productId);
+    // 1. Atualiza a quantidade do produto no banco
+    const { error: updateError } = await supabase
+      .from('produtos')
+      .update({ quantity: novaQuantidade })
+      .eq('id', productId);
 
-    if (!error) {
+    if (!updateError) {
+      // Atualiza a tela
       setProducts(prev => prev.map(p => p.id === productId ? { ...p, quantity: novaQuantidade } : p));
+      
+      // 2. GRAVA O HISTÓRICO NO BANCO (A Mágica acontece aqui!)
+      await supabase.from('historico_movimentacoes').insert([{
+        produto_nome: (produtoAtual as any).name, // Pega o nome do produto
+        tipo: type,
+        quantidade: qty,
+        usuario_email: session?.user?.email || "usuario_desconhecido@email.com" // Pega o e-mail logado
+      }]);
+
     } else {
-      console.error("Erro ao movimentar estoque:", error);
+      console.error("Erro ao movimentar estoque:", updateError);
     }
+    
     setRestockProduct(null);
+    setScreen("history"); 
   }
 
   const dashboardContent = (
@@ -132,7 +160,10 @@ export default function App() {
       <Sidebar
         current={screen}
         onNavigate={handleNavigate}
-        onLogout={() => supabase.auth.signOut()}
+        onLogout={() => {
+          localStorage.removeItem("@stockadmin-screen"); 
+          supabase.auth.signOut();
+        }}
       />
 
       <main className="flex-1 min-h-screen md:pt-0 pt-14 overflow-auto">
@@ -141,22 +172,26 @@ export default function App() {
         {screen === "product-form" && <ProductForm product={editingProduct} onSave={handleSave} onCancel={() => setScreen("products")} />}
         {screen === "alerts" && <StockAlerts products={products} onRestock={handleRestock} />}
         {screen === "movement" && <StockMovement products={products} preselected={restockProduct} onConfirm={handleMovement} />}
-      </main>
+        {screen === "history" && <MovementHistory />}      </main>
     </div>
   );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-8 h-8 border-4 border-[#3CB371] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <Router>
       <Routes>
-        {}
-        {}
         <Route path="/" element={!session ? <Login /> : <Navigate to="/dashboard" />} />
         <Route path="/cadastro" element={<Register />} />
         <Route path="/esqueci-senha" element={<ForgotPassword />} />
         <Route path="/atualizar-senha" element={<UpdatePassword />} />
 
-        {}
-        {}
         <Route 
           path="/dashboard" 
           element={session ? dashboardContent : <Navigate to="/" />} 

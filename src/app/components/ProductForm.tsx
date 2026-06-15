@@ -43,6 +43,23 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
     onSave({ ...form, ...(isEdit ? { id: product!.id } : {}) });
   }
 
+  // A FUNÇÃO ENTROU AQUI, ANTES DO RETURN:
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement | HTMLSelectElement>) {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Bloqueia o envio precipitado do formulário
+
+      const formElement = e.currentTarget.form;
+      if (!formElement) return;
+
+      const elements = Array.from(formElement.elements) as HTMLElement[];
+      const currentIndex = elements.indexOf(e.currentTarget);
+
+      if (currentIndex > -1 && currentIndex < elements.length - 1) {
+        elements[currentIndex + 1].focus();
+      }
+    }
+  }
+
   return (
     <div className="p-6 max-w-2xl">
       <div className="mb-6">
@@ -59,6 +76,7 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
               required
               value={form.name}
               onChange={e => set("name", e.target.value)}
+              onKeyDown={handleKeyDown} // <--- ADICIONADO AQUI
               placeholder="Ex: Notebook Dell i5"
             />
           </div>
@@ -71,6 +89,7 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
                 required
                 value={form.category}
                 onChange={e => set("category", e.target.value)}
+                onKeyDown={handleKeyDown} // <--- ADICIONADO AQUI
                 className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm outline-none bg-white transition-all"
                 onFocus={e => { e.target.style.borderColor = "#3CB371"; e.target.style.boxShadow = "0 0 0 3px rgba(60,179,113,0.12)"; }}
                 onBlur={e => { e.target.style.borderColor = "#e5e7eb"; e.target.style.boxShadow = "none"; }}
@@ -87,6 +106,7 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
                 step={0.01}
                 value={form.price}
                 onChange={e => set("price", parseFloat(e.target.value) || 0)}
+                onKeyDown={handleKeyDown} // <--- ADICIONADO AQUI
                 placeholder="0,00"
               />
             </div>
@@ -102,6 +122,7 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
                 min={0}
                 value={form.quantity}
                 onChange={e => set("quantity", parseInt(e.target.value) || 0)}
+                onKeyDown={handleKeyDown} // <--- ADICIONADO AQUI
                 placeholder="0"
               />
             </div>
@@ -113,6 +134,7 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
                 min={0}
                 value={form.minStock}
                 onChange={e => set("minStock", parseInt(e.target.value) || 0)}
+                onKeyDown={handleKeyDown} // <--- ADICIONADO AQUI
                 placeholder="5"
               />
             </div>
@@ -129,6 +151,7 @@ export function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
               className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm outline-none bg-white resize-none transition-all"
               onFocus={e => { e.target.style.borderColor = "#3CB371"; e.target.style.boxShadow = "0 0 0 3px rgba(60,179,113,0.12)"; }}
               onBlur={e => { e.target.style.borderColor = "#e5e7eb"; e.target.style.boxShadow = "none"; }}
+              // NOTA: Sem o handleKeyDown aqui para permitir quebrar linha com Enter
             />
           </div>
 

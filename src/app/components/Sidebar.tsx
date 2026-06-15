@@ -1,7 +1,8 @@
-import { LayoutDashboard, Package, AlertTriangle, ArrowLeftRight, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, Package, AlertTriangle, ArrowLeftRight, LogOut, Menu, X, History } from "lucide-react";
 import { useState } from "react";
 
-type Screen = "dashboard" | "products" | "product-form" | "alerts" | "movement";
+// 1. Adicionado o "history" aqui:
+type Screen = "dashboard" | "products" | "product-form" | "alerts" | "movement" | "history";
 
 interface SidebarProps {
   current: Screen;
@@ -14,6 +15,8 @@ const NAV_ITEMS = [
   { id: "products" as Screen, label: "Produtos", icon: Package },
   { id: "alerts" as Screen, label: "Alertas de Estoque", icon: AlertTriangle },
   { id: "movement" as Screen, label: "Movimentação", icon: ArrowLeftRight },
+  // 2. Adicionada a linha do Histórico aqui:
+  { id: "history" as Screen, label: "Histórico", icon: History },
 ];
 
 export function Sidebar({ current, onNavigate, onLogout }: SidebarProps) {
@@ -66,12 +69,10 @@ export function Sidebar({ current, onNavigate, onLogout }: SidebarProps) {
 
   return (
     <>
-      {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-60 min-h-screen shrink-0" style={{ backgroundColor: "#2E8B57" }}>
         <NavContent />
       </aside>
 
-      {/* Mobile header */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3 shadow" style={{ backgroundColor: "#2E8B57" }}>
         <div className="flex items-center gap-2">
           <Package size={20} className="text-white" />
@@ -82,7 +83,6 @@ export function Sidebar({ current, onNavigate, onLogout }: SidebarProps) {
         </button>
       </div>
 
-      {/* Mobile drawer */}
       {open && (
         <div className="md:hidden fixed inset-0 z-30" onClick={() => setOpen(false)}>
           <div className="absolute inset-0 bg-black/40" />
