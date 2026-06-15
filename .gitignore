@@ -1,0 +1,7 @@
+# Dependências
+node_modules
+dist
+
+# Arquivos de ambiente (Senhas)
+.env
+.env.local
