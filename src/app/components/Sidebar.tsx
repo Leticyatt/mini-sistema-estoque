@@ -27,8 +27,7 @@ export function Sidebar({ current, onNavigate, onLogout }: SidebarProps) {
             <Package size={18} className="text-white" />
           </div>
           <div>
-            <p className="text-white font-semibold text-sm leading-none">StockAdmin</p>
-            <p className="text-white/60 text-xs mt-0.5">Sistema de Estoque</p>
+            <p className="text-white font-semibold text-sm leading-none">Controle de Estoque</p>
           </div>
         </div>
       </div>
